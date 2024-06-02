@@ -44,12 +44,13 @@ int main() {
 	/*1. Create a doubly linked list by inserting elements based on a selected criterion.
 	The list must have at least 7 entries that are read from a file. (1 p)*/
 	FILE* fp = fopen("mutual_funds.txt", "r");
+	if (!fp) return -1;
 
 	Node* head = NULL;
 
 	char buffer[LINE_SIZE];
 	char* token;
-	char delimiters[] = ", \n";
+	char delimiters[] = ",\n";
 
 	char mutualFundCode[LINE_SIZE];
 	char mutualFundGroup[LINE_SIZE];
@@ -57,7 +58,8 @@ int main() {
 	double netAssetValue;
 	float returnOfInvestment;
 
-	while (fgets(buffer, LINE_SIZE, fp)) {
+	while (fgets(buffer, LINE_SIZE, fp)) 
+	{
 		token = strtok(buffer, delimiters);
 		strcpy(mutualFundCode, token);
 
@@ -104,7 +106,8 @@ int main() {
 	double NAVThreshold = 2500;
 	MutualFund* firstFund = findFirstMutualFundGreaterThanNAV(head, NAVThreshold);
 	
-	if (firstFund) {
+	if (firstFund) 
+	{
 		printf("\nFirst mutual fund with net asset value above %.2f:\n\n", NAVThreshold);
 		printMutualFund(firstFund);
 	}
@@ -114,7 +117,7 @@ int main() {
 
 	/*6.Write the function for creating an array with all the elements that have the nominal return
 	of investment higher than a limit specified as a parameter and are part of a specified mutual
-	fund group. The array doesn’t share HEAP memory space with the elements found in the doubly
+	fund group. The array doesnâ€™t share HEAP memory space with the elements found in the doubly
 	linked list. The function is called in the main() and the result (elements stored in the array)
 	is displayed on the console. (1.5 p)*/
 
@@ -125,8 +128,9 @@ int main() {
 
 	MutualFund** array = createArray(head, size, ROIThreshold, group);
 	printf("\nPrinting mutual funds above %.2f return level:\n\n", ROIThreshold);
-	for (int i = 0; i < size && array[i]; i++) {
-		printf("[%d]", i);
+	for (int i = 0; i < size && array[i]; i++) 
+	{
+		printf("[%d] ", i);
 		printMutualFund(array[i]);
 	}
 
@@ -139,7 +143,8 @@ MutualFund* createMutualFund(const char* mutualFundCode, const char* mutualFundG
 {
 	MutualFund* mutualFund = (MutualFund*)malloc(sizeof(MutualFund));
 
-	if (mutualFund) {
+	if (mutualFund) 
+	{
 		mutualFund->mutualFundCode = (char*)malloc(strlen(mutualFundCode) + 1);
 		if(mutualFund->mutualFundCode)
 			strcpy(mutualFund->mutualFundCode, mutualFundCode);
@@ -156,18 +161,23 @@ MutualFund* createMutualFund(const char* mutualFundCode, const char* mutualFundG
 	return mutualFund;
 }
 
-void printMutualFund(const MutualFund* mutualFund) {
-	printf("\tcode: %s\n\tgroup: %s\n\trisk level: %d\n\tnet asset value: %.2f\n\treturn of investment: %.2f\n", mutualFund->mutualFundCode, mutualFund->mutualFundGroup, mutualFund->riskLevel, mutualFund->netAssetValue, mutualFund->returnOfInvestment);
+void printMutualFund(const MutualFund* mutualFund) 
+{
+	printf("code: %s, group: %s, risk level: %d, net asset value: %.2f, return of investment: %.2f\n", mutualFund->mutualFundCode, mutualFund->mutualFundGroup, mutualFund->riskLevel, mutualFund->netAssetValue, mutualFund->returnOfInvestment);
 }
 
-void deleteMutualFund(MutualFund* mutualFund) {
+void deleteMutualFund(MutualFund* mutualFund) 
+{
 	free(mutualFund->mutualFundCode);
 	free(mutualFund->mutualFundGroup);
 }
 
-Node* createNode(MutualFund* mutualFund) {
+Node* createNode(MutualFund* mutualFund) 
+{
 	Node* node = (Node*)malloc(sizeof(Node));
-	if (node) {
+
+	if (node) 
+	{
 		node->data = mutualFund;
 		node->prev = NULL;
 		node->next = NULL;
@@ -175,8 +185,10 @@ Node* createNode(MutualFund* mutualFund) {
 	return node;
 }
 
-void addNode(Node** head, Node* node) {
-	if (*head == NULL) {
+void addNode(Node** head, Node* node) 
+{
+	if (*head == NULL) 
+	{
 		*head = node;
 	} 
 	else {
@@ -187,29 +199,31 @@ void addNode(Node** head, Node* node) {
 	}
 }
 
-void deleteNode(Node* node) {
+void deleteNode(Node* node) 
+{
 	deleteMutualFund(node->data);
 	free(node);
 }
 
-void printList(const Node* head) {
+void printList(const Node* head) 
+{
 	int counter = 0;
 	printf("\nForward traversal:\n\n");
 	while (head->next)
 	{
-		printf("[%d]", counter);
+		printf("Node %d: ", counter);
 		printMutualFund(head->data);
 		counter++;
 		head = head->next;
 	}
 
-	printf("[%d]", counter);
+	printf("Node %d: ", counter);
 	printMutualFund(head->data);
 
 	printf("\nBackward traversal:\n\n");
 	while (head)
 	{
-		printf("[%d]", counter);
+		printf("Node %d: ", counter);
 		printMutualFund(head->data);
 		counter--;
 		head = head->prev;
@@ -227,15 +241,18 @@ int getListSize(const Node* head)
 	return counter;
 }
 
-void deleteList(Node* head) {
-	while (head) {
+void deleteList(Node* head) 
+{
+	while (head) 
+	{
 		Node* temp = head;
 		head = head->next;
 		free(temp);
 	}
 }
 
-int countMutualFundsGreaterThanRiskLevel(const Node* head, const int riskLevelThreshold) {
+int countMutualFundsGreaterThanRiskLevel(const Node* head, const int riskLevelThreshold) 
+{
 	int counter = 0;
 	while (head)
 	{
@@ -247,7 +264,8 @@ int countMutualFundsGreaterThanRiskLevel(const Node* head, const int riskLevelTh
 	return counter;
 }
 
-void displayCapitalGainOrLoss(const Node* head) {
+void displayCapitalGainOrLoss(const Node* head) 
+{
 	while (head)
 	{
 		double result = head->data->netAssetValue * head->data->returnOfInvestment;
@@ -256,7 +274,8 @@ void displayCapitalGainOrLoss(const Node* head) {
 	}
 }
 
-MutualFund* findFirstMutualFundGreaterThanNAV(const Node* head, const double NAVThreshold) {
+MutualFund* findFirstMutualFundGreaterThanNAV(const Node* head, const double NAVThreshold) 
+{
 	MutualFund* fund = NULL;
 
 	while (head)
@@ -272,7 +291,8 @@ MutualFund* findFirstMutualFundGreaterThanNAV(const Node* head, const double NAV
 	return fund;
 }
 
-MutualFund** createArray(const Node* head, const int size, const float ROIThreshold, const char* group) {
+MutualFund** createArray(const Node* head, const int size, const float ROIThreshold, const char* group) 
+{
 	MutualFund** array = (MutualFund**)malloc(size * sizeof(MutualFund*));
 	if (array)
 	{
@@ -291,7 +311,8 @@ MutualFund** createArray(const Node* head, const int size, const float ROIThresh
 	return array;
 }
 
-void deleteArray(MutualFund** array, int size) {
+void deleteArray(MutualFund** array, int size) 
+{
 	for (int i = 0; i < size && array[i]; i++)
 		deleteMutualFund(array[i]);
 }
