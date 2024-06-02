@@ -1,0 +1,7 @@
+1,2024-06-01,John Doe,0.75
+2,2024-06-02,Jane Smith,0.85
+3,2024-06-03,Emily Johnson,0.60
+4,2024-06-04,Michael Brown,0.95
+5,2024-06-03,John Doe,0.50
+6,2024-06-02,David Wilson,0.40
+7,2024-06-01,Sarah Stone,0.80
