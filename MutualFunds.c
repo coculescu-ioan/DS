@@ -5,40 +5,37 @@
 
 #define LINE_SIZE 256
 
-struct MutualFund {
+typedef struct {
 	char* mutualFundCode;
 	char* mutualFundGroup;
 	int riskLevel;
 	double netAssetValue;
 	float returnOfInvestment;
-};
-typedef struct MutualFund MutualFund;
+} MutualFund;
 
-struct Node {
+typedef struct Node {
 	MutualFund* data;
 	struct Node* prev;
 	struct Node* next;
-};
-typedef struct Node Node;
+} Node;
 
 MutualFund* createMutualFund(const char*, const char*, const int, const double, const float);
 void printMutualFund(const MutualFund*);
-void deleteMutualFund(MutualFund*);
+void freeMutualFund(MutualFund*);
 
 Node* createNode(MutualFund*);
 void addNode(Node**, Node*);
-void deleteNode(Node*);
 
 void printList(const Node*);
 int getListSize(const Node*);
-void deleteList(Node*);
+void freeList(Node*);
 
 int countMutualFundsGreaterThanRiskLevel(const Node*, const int);
 void displayCapitalGainOrLoss(const Node*);
 MutualFund* findFirstMutualFundGreaterThanNAV(const Node*, const double);
 
 MutualFund** createArray(const Node*, const int, const float, const char*);
-void deleteArray(MutualFund**, int);
+
 
 int main() {
 	/*1. Create a doubly linked list by inserting elements based on a selected criterion.
@@ -73,7 +70,7 @@ int main() {
 		netAssetValue = atof(token);
 
 		token = strtok(NULL, delimiters);
-		returnOfInvestment = (float)atof(token);
+		returnOfInvestment = atof(token);
 
 		MutualFund* mutualFund = createMutualFund(mutualFundCode, mutualFundGroup, riskLevel, netAssetValue, returnOfInvestment);
 
@@ -92,12 +89,12 @@ int main() {
 	the risk level greater than a given value, sent as a parameter. (1 p)*/
 	int riskLevelThreshold = 5;
 	int noFunds = countMutualFundsGreaterThanRiskLevel(head, riskLevelThreshold);
-	printf("\nThe number of funds that have a risk level greater than %d is: %d\n\n", riskLevelThreshold, noFunds);
+	printf("\nThe number of funds that have a risk level greater than %d is: %d\n", riskLevelThreshold, noFunds);
 
 	/*4.Write the function that determines the capital gain/loss for all the mutual funds.
 	The function displays on the console the mutual fund code and the capital gain/loss by
 	applying the positive/negative return of investments to the net asset value attribute. (1 p)*/
-	printf("\nCapital gain/loss for mutual fund:\n\n");
+	printf("\nCapital gain/loss for mutual fund:\n");
 	displayCapitalGainOrLoss(head);
 
 	/*5.Write the function that searches in the doubly linked list for the first mutual fund 
@@ -108,11 +105,11 @@ int main() {
 	
 	if (firstFund) 
 	{
-		printf("\nFirst mutual fund with net asset value above %.2f:\n\n", NAVThreshold);
+		printf("\nFirst mutual fund with net asset value above %.2f:\n", NAVThreshold);
 		printMutualFund(firstFund);
 	}
 	else {
-		printf("\nNo mutual fund with net asset value above %.2f found!\n\n", NAVThreshold);
+		printf("\nNo mutual fund with net asset value above %.2f found!\n", NAVThreshold);
 	}
 
 	/*6.Write the function for creating an array with all the elements that have the nominal return
@@ -123,19 +120,20 @@ int main() {
 
 	int size = getListSize(head);
 
-	float ROIThreshold = 1.0f;
+	float ROIThreshold = 1;
 	char group[] = "D";
 
 	MutualFund** array = createArray(head, size, ROIThreshold, group);
-	printf("\nPrinting mutual funds above %.2f return level:\n\n", ROIThreshold);
-	for (int i = 0; i < size && array[i]; i++) 
-	{
-		printf("[%d] ", i);
-		printMutualFund(array[i]);
-	}
+	freeList(head);
 
-	deleteArray(array, size);
-	deleteList(head);
+	printf("\nPrinting mutual funds above %.2f return level:\n", ROIThreshold);
+	for (int i = 0; i < size && array[i]; i++) 
+		printMutualFund(array[i]);
+
+
+	for (int i = 0; i < size && array[i]; i++)
+		freeMutualFund(array[i]);
+
 	return 0;
 }
 
@@ -163,13 +161,14 @@ MutualFund* createMutualFund(const char* mutualFundCode, const char* mutualFundG
 
 void printMutualFund(const MutualFund* mutualFund) 
 {
-	printf("code: %s, group: %s, risk level: %d, net asset value: %.2f, return of investment: %.2f\n", mutualFund->mutualFundCode, mutualFund->mutualFundGroup, mutualFund->riskLevel, mutualFund->netAssetValue, mutualFund->returnOfInvestment);
+	printf("Mutual fund code: %s, group: %s, risk level: %d, net asset value: %.2f, return of investment: %.2f\n", mutualFund->mutualFundCode, mutualFund->mutualFundGroup, mutualFund->riskLevel, mutualFund->netAssetValue, mutualFund->returnOfInvestment);
 }
 
-void deleteMutualFund(MutualFund* mutualFund) 
+void freeMutualFund(MutualFund* mutualFund) 
 {
 	free(mutualFund->mutualFundCode);
 	free(mutualFund->mutualFundGroup);
+	free(mutualFund);
 }
 
 Node* createNode(MutualFund* mutualFund) 
@@ -188,9 +187,7 @@ Node* createNode(MutualFund* mutualFund)
 void addNode(Node** head, Node* node) 
 {
 	if (*head == NULL) 
-	{
 		*head = node;
-	} 
 	else {
 		node->next = *head;
 		(*head)->prev = node;
@@ -199,69 +196,59 @@ void addNode(Node** head, Node* node)
 	}
 }
 
-void deleteNode(Node* node) 
-{
-	deleteMutualFund(node->data);
-	free(node);
-}
-
 void printList(const Node* head) 
 {
-	int counter = 0;
-	printf("\nForward traversal:\n\n");
+	if (!head) return;
+
+	printf("\nForward traversal:\n");
 	while (head->next)
 	{
-		printf("Node %d: ", counter);
 		printMutualFund(head->data);
-		counter++;
 		head = head->next;
 	}
 
-	printf("Node %d: ", counter);
 	printMutualFund(head->data);
 
-	printf("\nBackward traversal:\n\n");
+	printf("\nBackward traversal:\n");
 	while (head)
 	{
-		printf("Node %d: ", counter);
 		printMutualFund(head->data);
-		counter--;
 		head = head->prev;
 	}
 }
 
 int getListSize(const Node* head)
 {
-	int counter = 0;
+	int count = 0;
 	while (head)
 	{
-		counter++;
+		count++;
 		head = head->next;
 	}
-	return counter;
+	return count;
 }
 
-void deleteList(Node* head) 
+void freeList(Node* head) 
 {
 	while (head) 
 	{
 		Node* temp = head;
 		head = head->next;
+		freeMutualFund(temp->data);
 		free(temp);
 	}
 }
 
 int countMutualFundsGreaterThanRiskLevel(const Node* head, const int riskLevelThreshold) 
 {
-	int counter = 0;
+	int count = 0;
 	while (head)
 	{
 		if (head->data->riskLevel > riskLevelThreshold)
-			counter++;
+			count++;
 		head = head->next;
 	}
-
-	return counter;
+	return count;
 }
 
 void displayCapitalGainOrLoss(const Node* head) 
@@ -277,7 +264,6 @@ void displayCapitalGainOrLoss(const Node* head)
 MutualFund* findFirstMutualFundGreaterThanNAV(const Node* head, const double NAVThreshold) 
 {
 	MutualFund* fund = NULL;
-
 	while (head)
 	{
 		if (head->data->netAssetValue > NAVThreshold)
@@ -287,7 +273,6 @@ MutualFund* findFirstMutualFundGreaterThanNAV(const Node* head, const double NAV
 		}
 		head = head->next;
 	}
-
 	return fund;
 }
 
@@ -296,6 +281,7 @@ MutualFund** createArray(const Node* head, const int size, const float ROIThresh
 	MutualFund** array = (MutualFund**)malloc(size * sizeof(MutualFund*));
 	if (array)
 	{
+		// Initialize the allocated memory
 		memset(array, 0, size * sizeof(MutualFund*));
 
 		int index = 0;
@@ -307,12 +293,5 @@ MutualFund** createArray(const Node* head, const int size, const float ROIThresh
 			head = head->next;
 		}
 	}
-
 	return array;
-}
-
-void deleteArray(MutualFund** array, int size) 
-{
-	for (int i = 0; i < size && array[i]; i++)
-		deleteMutualFund(array[i]);
 }
