@@ -1,0 +1,5 @@
+2024-06-01,Dr. Smith,Cardiology,Hypertension,200
+2024-06-02,Dr. Jones,Neurology,Migraine,150
+2024-06-03,Dr. Brown,Dermatology,Acne,100
+2024-06-04,Dr. White,Pediatrics,Flu,120
+2024-06-05,Dr. Black,Orthopedics,Fracture,300
