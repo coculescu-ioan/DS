@@ -42,11 +42,19 @@ int countTasksWithCompletionAbove(const HashTable*, const float);
 void updateOwnerForTask(HashTable*, const unsigned int, const char*);
 Node* createTaskListOnDate(const HashTable*, const char*);
 
-int main() {
+int main() 
+{
+	HashTable* ht = (HashTable*)malloc(sizeof(HashTable));
+	if (ht)
+	{
+		ht->size = TABLE_SIZE;
+		ht->buckets = (Node**)malloc((*ht)->size * sizeof(Node*));
+		if (ht->buckets)
+			memset((*ht)->buckets, 0, (*ht)->size * sizeof(Node*));
+	}
+
 	FILE* fp = fopen("tasks.txt", "r");
 	if (!fp) return -1;
-
-	HashTable* ht = NULL;
 
 	char buffer[LINE_SIZE];
 	char* token;
@@ -178,7 +186,6 @@ void freeList(Node** head)
 		freeTask(temp->data);
 		free(temp);
 	}
-	*head = NULL;
 }
 
 int hash(const char key, int size)
@@ -188,18 +195,8 @@ int hash(const char key, int size)
 
 void addToHashTable(HashTable** ht, Task* t)
 {
-	if (*ht == NULL)
+	if (*ht)
 	{
-		*ht = (HashTable*)malloc(sizeof(HashTable));
-		if (*ht)
-		{
-			(*ht)->size = TABLE_SIZE;
-			(*ht)->buckets = (Node**)malloc((*ht)->size * sizeof(Node*));
-			if ((*ht)->buckets)
-				memset((*ht)->buckets, 0, (*ht)->size * sizeof(Node*));
-		}
-	}
-	else {
 		int index = hash(t->ownerName[0], (*ht)->size);
 		addNode(&(*ht)->buckets[index], t);
 	}
