@@ -1,0 +1,9 @@
+fileF,1024,True,2024/01/15,john
+fileB,2048,False,2023/11/20,scott
+fileC,512,False,2024/05/10,bob
+fileA,4096,True,2022/12/25,alice
+fileD,10240,True,2024/03/22,john
+fileH,20480,False,2023/09/30,scott
+fileG,3072,True,2024/06/01,alice
+fileI,1024,False,2023/07/15,bob
+fileE,8192,True,2024/04/30,john
